@@ -1,8 +1,14 @@
 <template>
-  <v-container fill-height fluid>
+  <v-container class="mainContainer" fill-height fluid>
     <v-row justify="center">
       <v-col cols="8" md="6" lg="4">
         <v-card ref="form">
+          <v-img
+            :src="require('../assets/logo-header.svg')"
+            class="logo"
+            contain
+            height="200"
+          />
           <v-card-text>
             <v-alert v-if="authData.error" type="error">
               {{ authData.error }}
@@ -16,7 +22,9 @@
               type="Password"
               label="Password"
             ></v-text-field>
-            <v-btn color="primary" @click="login"> Login </v-btn>
+            <v-btn class="loginButton" color="primary" @click="login">
+              Login
+            </v-btn>
           </v-card-text>
         </v-card>
       </v-col>
@@ -25,6 +33,8 @@
 </template>
 
 <script>
+// import axios from "axios";
+
 export default {
   data() {
     return {
@@ -52,4 +62,8 @@ export default {
 };
 </script>
 
-<style></style>
+<style lang="scss" scoped>
+.mainContainer {
+  padding: 50px;
+}
+</style>

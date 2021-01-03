@@ -1,33 +1,31 @@
 <template>
   <v-app>
     <v-main>
-      <v-app-bar app color="primary" dark>
-        <Login v-if="!this.$store.getters.isAuthenticated" />
-      </v-app-bar>
-      <h1>Hi</h1>
-      <!-- <HelloWorld /> -->
+      <Header />
+      <transition name="fadeUp" mode="out-in">
+        <router-view></router-view>
+      </transition>
     </v-main>
   </v-app>
 </template>
 
 <script>
-// import HelloWorld from "./components/HelloWorld";
-import Login from "./components/Login";
+import Header from "@/components/Header.vue";
 
 export default {
   name: "App",
-
   components: {
-    Login
-  },
-
-  data: () => ({
-    //
-  }),
-  computed: {
-    token() {
-      return this.$store.state.token;
-    }
+    Header
   }
 };
 </script>
+
+<style lang="scss">
+#app {
+  font-family: Avenir, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-align: center;
+  color: #2c3e50;
+}
+</style>

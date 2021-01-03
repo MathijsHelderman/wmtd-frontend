@@ -1,6 +1,6 @@
 import Vue from "vue";
 import Vuex from "vuex";
-import axios from "../axios-auth";
+import axios from "@/axios-auth";
 
 Vue.use(Vuex);
 
@@ -11,6 +11,7 @@ export const store = new Vuex.Store({
   },
   getters: {
     isAuthenticated(state) {
+      state.token = "sd"; // TODO
       return state.token != null;
     }
   },
@@ -36,6 +37,10 @@ export const store = new Vuex.Store({
           localStorage.userName = res.data.userDetails.userName;
         })
         .catch(error => (this.error = error));
+    },
+    logout() {
+      localStorage.token = null;
+      localStorage.username = null;
     }
   }
 });
