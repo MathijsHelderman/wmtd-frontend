@@ -1,28 +1,33 @@
 <template>
-  <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png" />
-    <HelloWorld msg="Welcome to Your Vue.js App" />
-  </div>
+  <v-app>
+    <v-main>
+      <v-app-bar app color="primary" dark>
+        <Login v-if="!this.$store.getters.isAuthenticated" />
+      </v-app-bar>
+      <h1>Hi</h1>
+      <!-- <HelloWorld /> -->
+    </v-main>
+  </v-app>
 </template>
 
 <script>
-import HelloWorld from "./components/HelloWorld.vue";
+// import HelloWorld from "./components/HelloWorld";
+import Login from "./components/Login";
 
 export default {
   name: "App",
+
   components: {
-    HelloWorld
+    Login
+  },
+
+  data: () => ({
+    //
+  }),
+  computed: {
+    token() {
+      return this.$store.state.token;
+    }
   }
 };
 </script>
-
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
-</style>
