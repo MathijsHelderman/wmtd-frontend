@@ -80,7 +80,7 @@ router.beforeEach((to, from, next) => {
     if (store.getters.isAuthenticated) {
       next();
     } else {
-      next("/Home");
+      next({ name: "Home" });
     }
   } else {
     next();
