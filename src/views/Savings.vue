@@ -15,6 +15,9 @@ export default {
 </script>
 
 <style lang="scss">
+h1 {
+  margin-top: 30px;
+}
 .v-btn {
   background-color: rgb(185, 218, 216) !important;
   opacity: 0.8;

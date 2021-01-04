@@ -1,5 +1,7 @@
 <template>
   <v-container>
+    <p class="success">{{ successMessage }}</p>
+    <p class="error">{{ errorMessage }}</p>
     <v-data-table
       :headers="headers"
       :items="savings"
@@ -7,7 +9,7 @@
       :search="search"
       :loading="loadingBool"
       loading-text="Loading... Please wait"
-      class="elevation-1"
+      class="elevation-3 dataTable"
     >
       <template v-slot:top>
         <v-toolbar flat>
@@ -112,9 +114,12 @@ import axios from "@/axios-auth";
 export default {
   // components: { Test },
   data: () => ({
+    DEBUG: true,
     loadingBool: true,
     dialog: false,
     dialogDelete: false,
+    errorMessage: "",
+    successMessage: "",
     search: "",
     headers: [
       { text: "Id", value: "id", filterable: false },
@@ -154,21 +159,35 @@ export default {
   },
 
   mounted() {
-    // this.loadData();
-    this.initializeMock();
+    if (this.DEBUG) {
+      this.initializeMock();
+    } else {
+      this.loadData();
+    }
   },
 
   methods: {
     loadData() {
+      this.errorMessage = "";
+      this.loadingBool = true;
       axios
         .get("/savings")
         .then(response => {
           // console.log(response);
           this.savings = response.data;
+          this.successMessage =
+            "Success! Got " + this.savings.length + " savings objects.";
+          setTimeout(() => (this.successMessage = ""), 2000);
         })
-        .catch(error => console.log(error));
+        .catch(error => {
+          console.log(error);
+          this.errorMessage = error;
+        })
+        .finally(() => (this.loadingBool = false));
     },
+
     async initializeMock() {
+      this.errorMessage = "";
       setTimeout(() => {
         this.savings = [
           {
@@ -223,6 +242,9 @@ export default {
           }
         ];
         this.loadingBool = false;
+        this.successMessage =
+          "Success! Got " + this.savings.length + " savings objects.";
+        setTimeout(() => (this.successMessage = ""), 2000);
       }, 1000);
     },
 
@@ -236,11 +258,6 @@ export default {
       this.editedIndex = this.savings.indexOf(item);
       this.editedItem = Object.assign({}, item);
       this.dialogDelete = true;
-    },
-
-    deleteItemConfirm() {
-      this.savings.splice(this.editedIndex, 1);
-      this.closeDelete();
     },
 
     close() {
@@ -259,13 +276,71 @@ export default {
       });
     },
 
-    save() {
-      if (this.editedIndex > -1) {
-        Object.assign(this.savings[this.editedIndex], this.editedItem);
+    deleteItemConfirm() {
+      this.errorMessage = "";
+      if (this.DEBUG) {
+        this.savings.splice(this.editedIndex, 1);
+        this.closeDelete();
       } else {
-        this.savings.push(this.editedItem);
+        axios
+          .delete("/savings/" + this.editedItem.id)
+          .then(response => {
+            console.log(response);
+            this.successMessage =
+              "Successfully deleted " + this.editedItem.name + ".";
+            setTimeout(() => (this.successMessage = ""), 2000);
+            this.savings.splice(this.editedIndex, 1);
+          })
+          .catch(error => {
+            console.log(error);
+            this.errorMessage = error;
+          })
+          .finally(() => this.closeDelete());
       }
-      this.close();
+    },
+
+    save() {
+      this.errorMessage = "";
+      if (this.DEBUG) {
+        if (this.editedIndex > -1) {
+          Object.assign(this.savings[this.editedIndex], this.editedItem);
+        } else {
+          this.savings.push(this.editedItem);
+        }
+        this.close();
+      } else {
+        if (this.editedIndex > -1) {
+          axios
+            .put("/savings/" + this.editedItem.id, this.editedItem)
+            .then(response => {
+              console.log(response);
+              this.successMessage =
+                "Successfully edited " + this.editedItem.name + ".";
+              setTimeout(() => (this.successMessage = ""), 2000);
+              Object.assign(this.savings[this.editedIndex], this.editedItem);
+            })
+            .catch(error => {
+              console.log(error);
+              this.errorMessage = error;
+            })
+            .finally(() => this.close());
+        } else {
+          axios
+            .post("/savings", this.editedItem)
+            .then(response => {
+              console.log(response);
+              this.successMessage =
+                "Successfully added " + this.editedItem.name + ".";
+              setTimeout(() => (this.successMessage = ""), 2000);
+              this.savings.push(this.editedItem);
+            })
+            .catch(error => {
+              console.log(error);
+              this.errorMessage = error;
+            })
+            .finally(() => this.close());
+        }
+      }
     }
   }
 };
@@ -294,7 +369,7 @@ export default {
   }
 }
 .dataTable {
-  margin-top: 30px;
+  padding-top: 8px;
 }
 .v-icon.edit {
   margin-right: 6px;
@@ -310,5 +385,11 @@ export default {
   &:hover {
     color: red;
   }
+}
+.error {
+  color: white;
+}
+.success {
+  color: white;
 }
 </style>
