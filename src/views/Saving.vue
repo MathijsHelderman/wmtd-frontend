@@ -27,7 +27,7 @@ export default {
   name: "Saving",
   components: {},
   data: () => ({
-    DEBUG: false,
+    DEBUG: true,
     loadingBool: true,
     errorMessage: "",
     successMessage: "",

@@ -2,60 +2,89 @@ import Vue from "vue";
 import Vuex from "vuex";
 import axios from "@/axios-auth";
 import VueJwtDecode from "vue-jwt-decode";
+import router from "@/router";
 
 Vue.use(Vuex);
 
 export const store = new Vuex.Store({
   state: {
-    token: null,
-    username: null
+    error: null
   },
   getters: {
-    isAuthenticated(state) {
-      // state.token = "sd"; // TODO
-      return state.token != null;
+    getError(state) {
+      return state.error;
+    },
+    isAuthenticated() {
+      let access_token = localStorage.getItem("access_token");
+      return access_token != "null" && access_token != null;
+    },
+    getEmail() {
+      return localStorage.getItem("email");
+    },
+    getName() {
+      let firstname = localStorage.getItem("firstname");
+      let lastname = localStorage.getItem("lastname");
+      return firstname + " " + lastname;
     }
   },
   mutations: {
-    authUser(state, userData) {
-      state.token = userData.token;
-      state.username = userData.userDetails.userName;
+    stateError(state, error) {
+      state.error = error;
+    },
+    logout(state) {
+      state.error = null;
+      localStorage.setItem("access_token", null);
+      localStorage.setItem("refresh_token", null);
     }
   },
   actions: {
     login({ commit }, authData) {
-      // console.log(authData.email + authData.password);
       axios
         .post("/Login", {
           email: authData.email,
           password: authData.password
         })
-        .then(res => {
-          console.log(res.data[0]);
-          // like this
-          let token = VueJwtDecode.decode("<your jwt>");
-          console.log("Token decoded: " + token);
-          // // or like this
-          // Vue.use(VueJwtDecode);
-          // Vue.jwtDec("<your jwt>");
+        .then(async res => {
+          if (res.data.httpStatusCode != 200) {
+            throw new Error("Not able to login.");
+          } else {
+            let access_token = res.data.data[0].accessToken;
+            let refresh_token = res.data.data[0].refreshToken;
 
-          // // or in component
-          // this.$jwtDec("<your jwt>");
+            let decoded_token = VueJwtDecode.decode(access_token);
+            let role =
+              decoded_token[
+                "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+              ];
 
-          commit("authUser", res.data);
-          axios.defaults.headers.common["Authorization"] =
-            "Bearer " + res.data.token;
-          localStorage.token = res.data.token;
-          localStorage.userName = res.data.userDetails.userName;
+            // console.log("Role: " + role);
+
+            if (role != "Admin") {
+              return Promise.reject("Cannot login");
+            }
+
+            let accountData = res.data.data[0].accountResponse;
+            // console.log(
+            //   "Accountdata: " + JSON.stringify(accountData, null, "\t")
+            // );
+            localStorage.setItem("access_token", access_token);
+            localStorage.setItem("refresh_token", refresh_token);
+            localStorage.setItem("email", accountData.email);
+            localStorage.setItem("firstname", accountData.firstname);
+            localStorage.setItem("lastname", accountData.lastname);
+            router.go();
+          }
         })
-        .catch(error => {
-          this.error = error;
-          // console.log(this.error);
+        .catch(async () => {
+          commit("stateError", "Unknown credentials.");
+          // await Vue.nextTick();
+          // commit("logout"); // the previous commit will not trigger if I uncomment this line.... WHY?
         });
     },
-    logout() {
-      this.state.token = null;
-      this.state.username = null;
+    logout({ commit }) {
+      commit("logout");
+
+      router.go();
     }
   }
 });

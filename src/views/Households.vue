@@ -182,7 +182,7 @@ export default {
   name: "Households",
   components: {},
   data: () => ({
-    DEBUG: false,
+    DEBUG: true,
     loadingBool: true,
     dialog: false,
     dialogDelete: false,

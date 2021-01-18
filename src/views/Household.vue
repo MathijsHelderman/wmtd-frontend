@@ -109,7 +109,7 @@ export default {
   name: "Household",
   components: {},
   data: () => ({
-    DEBUG: false,
+    DEBUG: true,
     loadingBool: true,
     errorMessage: "",
     successMessage: "",

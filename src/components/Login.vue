@@ -10,8 +10,8 @@
             height="200"
           />
           <v-card-text>
-            <v-alert v-if="authData.error" type="error">
-              {{ authData.error }}
+            <v-alert v-if="this.$store.getters.getError != null" type="warning">
+              {{ this.$store.getters.getError }}
             </v-alert>
             <v-text-field
               v-model="authData.email"
@@ -46,8 +46,7 @@ export default {
     return {
       authData: {
         email: "",
-        password: "",
-        error: ""
+        password: ""
       },
       emailHasErrors: true,
       rules: {

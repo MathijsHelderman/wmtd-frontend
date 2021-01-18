@@ -68,7 +68,6 @@
                           :rules="[rules.required]"
                         ></v-text-field>
                       </v-col>
-                      
                     </v-row>
                   </v-container>
                 </v-card-text>
@@ -87,11 +86,8 @@
             <v-dialog v-model="dialogDelete" max-width="500px">
               <v-card>
                 <v-card-title class="headline"
-                  >Are you sure you want to delete the account with
-                  account id:
-                  {{
-                    editedItem.accountId 
-                  }}?</v-card-title
+                  >Are you sure you want to delete the account with account id:
+                  {{ editedItem.accountId }}?</v-card-title
                 >
                 <v-card-actions>
                   <v-spacer></v-spacer>
@@ -196,12 +192,12 @@ export default {
         value: "isActive",
         filterable: false
       },
-       {
+      {
         text: "is admin",
         value: "isAdmin",
         filterable: false
       },
-       {
+      {
         text: "can post",
         value: "canpost",
         filterable: false
@@ -218,7 +214,6 @@ export default {
       isAdmin: "",
       isActive: "",
       canPost: []
-      
     },
     defaultItem: {
       id: "",
@@ -238,8 +233,7 @@ export default {
     formTitle() {
       return this.editedIndex === -1
         ? "New account"
-        : "Edit number: " +
-            this.editedItem.id 
+        : "Edit number: " + this.editedItem.id;
     }
   },
 
@@ -253,22 +247,28 @@ export default {
   },
 
   mounted() {
-    
-  
-      this.loadData();
-    
+    this.loadData();
   },
 
   methods: {
-    loadData() {
+    async loadData() {
+      console.log("Aloha");
       this.errorMessage = "";
       this.loadingBool = true;
+
+      axios
+        .get("https://jsonplaceholder.typicode.com/todos/1")
+        .then(res => {
+          console.log("Test" + JSON.stringify(res, null, "\t"));
+        })
+        .catch(err => {
+          console.log("Test" + err);
+        });
       axios
         .get("/accounts")
         .then(response => {
           console.log(response);
           this.households = response.data;
-       
         })
         .catch(error => {
           console.log(error);
@@ -276,8 +276,6 @@ export default {
         })
         .finally(() => (this.loadingBool = false));
     },
-
-    
 
     editItem(item) {
       this.editedIndex = this.households.indexOf(item);

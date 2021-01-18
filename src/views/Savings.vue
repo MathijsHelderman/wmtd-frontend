@@ -166,7 +166,7 @@ export default {
   name: "Savings",
   // components: { Test },
   data: () => ({
-    DEBUG: false,
+    DEBUG: true,
     loadingBool: true,
     dialog: false,
     dialogDelete: false,
