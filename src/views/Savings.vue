@@ -147,12 +147,15 @@
           </v-tooltip>
         </template>
         <template v-slot:no-data>
-          <v-btn color="primary" @click="loadData">
+          <v-btn color="primary" @click="getData">
             Reset
           </v-btn>
         </template>
       </v-data-table>
 
+      <v-btn color="primary" @click="getData">
+        Refresh
+      </v-btn>
       <!-- <Test /> -->
     </v-container>
   </div>
@@ -165,36 +168,38 @@ import axios from "@/axios-auth";
 export default {
   name: "Savings",
   // components: { Test },
-  data: () => ({
-    DEBUG: true,
-    loadingBool: true,
-    dialog: false,
-    dialogDelete: false,
-    errorMessage: "",
-    successMessage: "",
-    search: "",
-    headers: [
-      { text: "Id", value: "id", filterable: false },
-      { text: "Name", value: "name" },
-      { text: "Description", value: "description" },
-      { text: "Actions", value: "actions", sortable: false, width: "120px" }
-    ],
-    savings: [],
-    editedIndex: -1,
-    editedItem: {
-      id: 0,
-      name: "",
-      description: ""
-    },
-    defaultItem: {
-      id: 0,
-      name: "",
-      description: ""
-    },
-    rules: {
-      required: value => !!value || "Required."
-    }
-  }),
+  data() {
+    return {
+      DEBUG: true,
+      loadingBool: true,
+      dialog: false,
+      dialogDelete: false,
+      errorMessage: "",
+      successMessage: "",
+      search: "",
+      headers: [
+        { text: "Id", value: "id", filterable: false },
+        { text: "Name", value: "name" },
+        { text: "Description", value: "description" },
+        { text: "Actions", value: "actions", sortable: false, width: "120px" }
+      ],
+      savings: [],
+      editedIndex: -1,
+      editedItem: {
+        id: 0,
+        name: "",
+        description: ""
+      },
+      defaultItem: {
+        id: 0,
+        name: "",
+        description: ""
+      },
+      rules: {
+        required: value => !!value || "Required."
+      }
+    };
+  },
 
   computed: {
     formTitle() {
@@ -214,14 +219,17 @@ export default {
   },
 
   mounted() {
-    if (this.DEBUG) {
-      this.initializeMock();
-    } else {
-      this.loadData();
-    }
+    this.getData();
   },
 
   methods: {
+    getData() {
+      if (this.DEBUG) {
+        this.initializeMock();
+      } else {
+        this.loadData();
+      }
+    },
     loadData() {
       this.errorMessage = "";
       this.loadingBool = true;

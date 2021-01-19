@@ -51,21 +51,24 @@
                         <v-text-field
                           v-model="editedItem.email"
                           label="Email"
-                          :rules="[rules.required]"
+                          :rules="[rules.required, rules.email]"
+                          placeholder="john@doe.nl"
                         ></v-text-field>
                       </v-col>
                       <v-col cols="12" sm="12" md="12">
                         <v-text-field
-                          v-model="editedItem.firstName"
+                          v-model="editedItem.firstname"
                           label="first name"
                           :rules="[rules.required]"
+                          placeholder="john"
                         ></v-text-field>
                       </v-col>
                       <v-col cols="12" sm="12" md="12">
                         <v-text-field
-                          v-model="editedItem.lastName"
+                          v-model="editedItem.lastname"
                           label="last name"
                           :rules="[rules.required]"
+                          placeholder="doe"
                         ></v-text-field>
                       </v-col>
                     </v-row>
@@ -87,7 +90,9 @@
               <v-card>
                 <v-card-title class="headline"
                   >Are you sure you want to delete the account with account id:
-                  {{ editedItem.accountId }}?</v-card-title
+                  {{
+                    editedItem.firstname + " " + editedItem.lastname
+                  }}?</v-card-title
                 >
                 <v-card-actions>
                   <v-spacer></v-spacer>
@@ -157,6 +162,9 @@
           </v-btn>
         </template>
       </v-data-table>
+      <v-btn color="primary" @click="loadData">
+        Refresh
+      </v-btn>
 
       <!-- <Test /> -->
     </v-container>
@@ -169,65 +177,78 @@ import axios from "@/axios-auth";
 export default {
   name: "Accounts",
   components: {},
-  data: () => ({
-    DEBUG: false,
-    loadingBool: true,
-    dialog: false,
-    dialogDelete: false,
-    errorMessage: "",
-    successMessage: "",
-    search: "",
-    headers: [
-      { text: "Id", value: "id", filterable: false },
-      { text: "First name", value: "firstname", filterable: false },
-      {
-        text: "Last name",
-        value: "lastname",
-        filterable: false
+  data() {
+    return {
+      DEBUG: false,
+      loadingBool: true,
+      dialog: false,
+      dialogDelete: false,
+      errorMessage: "",
+      successMessage: "",
+      emailHasErrors: true,
+      search: "",
+      headers: [
+        { text: "Id", value: "id", filterable: false },
+        { text: "First name", value: "firstname", filterable: false },
+        {
+          text: "Last name",
+          value: "lastname",
+          filterable: false
+        },
+        { text: "last name", value: "lastname", filterable: false },
+        { text: "email", value: "email", filterable: true },
+        {
+          text: "is active",
+          value: "isActive",
+          filterable: false
+        },
+        {
+          text: "is admin",
+          value: "isAdmin",
+          filterable: false
+        },
+        {
+          text: "can post",
+          value: "canpost",
+          filterable: false
+        },
+        { text: "Actions", value: "actions", sortable: false, width: "120px" }
+      ],
+      accounts: [],
+      editedIndex: -1,
+      editedItem: {
+        id: "",
+        firstname: "",
+        lastname: "",
+        email: "",
+        isAdmin: "",
+        isActive: "",
+        canPost: []
       },
-      { text: "last name", value: "lastname", filterable: false },
-      { text: "email", value: "email", filterable: true },
-      {
-        text: "is active",
-        value: "isActive",
-        filterable: false
+      defaultItem: {
+        id: "",
+        firstname: "",
+        lastname: "",
+        email: "",
+        isAdmin: "",
+        isActive: "",
+        canPost: []
       },
-      {
-        text: "is admin",
-        value: "isAdmin",
-        filterable: false
-      },
-      {
-        text: "can post",
-        value: "canpost",
-        filterable: false
-      },
-      { text: "Actions", value: "actions", sortable: false, width: "120px" }
-    ],
-    accounts: [],
-    editedIndex: -1,
-    editedItem: {
-      id: "",
-      firstname: "",
-      lastname: "",
-      email: "",
-      isAdmin: "",
-      isActive: "",
-      canPost: []
-    },
-    defaultItem: {
-      id: "",
-      firstname: "",
-      lastname: "",
-      email: "",
-      isAdmin: "",
-      isActive: "",
-      canPost: []
-    },
-    rules: {
-      required: value => !!value || "Required."
-    }
-  }),
+      rules: {
+        required: value => !!value || "Required.",
+        email: value => {
+          const pattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+          if (pattern.test(value)) {
+            this.emailHasErrors = false;
+            return true;
+          } else {
+            this.emailHasErrors = true;
+            return "Invalid e-mail.";
+          }
+        }
+      }
+    };
+  },
 
   computed: {
     formTitle() {
@@ -251,41 +272,33 @@ export default {
   },
 
   methods: {
-    async loadData() {
-      console.log("Aloha");
+    loadData() {
       this.errorMessage = "";
       this.loadingBool = true;
 
       axios
-        .get("https://jsonplaceholder.typicode.com/todos/1")
-        .then(res => {
-          console.log("Test" + JSON.stringify(res, null, "\t"));
-        })
-        .catch(err => {
-          console.log("Test" + err);
-        });
-      axios
-        .get("/accounts")
+        .get("/CMS/accounts")
         .then(response => {
-          console.log(response);
-          this.households = response.data;
+          // console.log(response.data.data[0]);
+          this.accounts = response.data.data[0];
         })
         .catch(error => {
-          console.log(error);
+          // console.log(error);
           this.errorMessage = error;
         })
         .finally(() => (this.loadingBool = false));
     },
 
     editItem(item) {
-      this.editedIndex = this.households.indexOf(item);
+      this.editedIndex = this.accounts.indexOf(item);
       // console.log(this.editedIndex);
       this.editedItem = Object.assign({}, item);
       this.dialog = true;
     },
 
     deleteItem(item) {
-      this.editedIndex = this.households.indexOf(item);
+      console.log(item);
+      this.editedIndex = this.accounts.indexOf(item);
       this.editedItem = Object.assign({}, item);
       this.dialogDelete = true;
     },
@@ -309,7 +322,7 @@ export default {
     deleteItemConfirm() {
       this.errorMessage = "";
       if (this.DEBUG) {
-        this.households.splice(this.editedIndex, 1);
+        this.accounts.splice(this.editedIndex, 1);
         this.closeDelete();
       } else {
         axios
@@ -319,7 +332,7 @@ export default {
             this.successMessage =
               "Successfully deleted " + this.editedItem.firstname + ".";
             setTimeout(() => (this.successMessage = ""), 2000);
-            // this.households.splice(this.editedIndex, 1);
+            // this.accounts.splice(this.editedIndex, 1);
             this.$emit("update");
           })
           .catch(error => {
@@ -346,9 +359,13 @@ export default {
             .then(response => {
               console.log(response);
               this.successMessage =
-                "Successfully edited " + this.editedItem.name + ".";
+                "Successfully edited " +
+                this.editedItem.firstname +
+                " " +
+                this.editedItem.lastname +
+                ".";
               setTimeout(() => (this.successMessage = ""), 2000);
-              // Object.assign(this.households[this.editedIndex], this.editedItem);
+              // Object.assign(this.accounts[this.editedIndex], this.editedItem);
               this.$emit("update");
             })
             .catch(error => {
@@ -362,9 +379,13 @@ export default {
             .then(response => {
               console.log(response);
               this.successMessage =
-                "Successfully added " + this.editedItem.name + ".";
+                "Successfully added " +
+                this.editedItem.firstname +
+                " " +
+                this.editItem.lastname +
+                ".";
               setTimeout(() => (this.successMessage = ""), 2000);
-              // this.households.push(this.editedItem);
+              // this.accounts.push(this.editedItem);
               this.$emit("update");
             })
             .catch(error => {

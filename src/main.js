@@ -4,6 +4,7 @@ import vuetify from "./plugins/vuetify";
 import { store } from "./store/store";
 import router from "./router";
 import axios from "@/axios-auth";
+import axiosRefresh from "@/axios-refresh";
 import VueJwtDecode from "vue-jwt-decode";
 
 Vue.config.productionTip = false;
@@ -24,7 +25,7 @@ axios.interceptors.request.use(
       return config;
     }
 
-    const access_token = localStorage.getItem("access_token");
+    let access_token = localStorage.getItem("access_token");
     if (!access_token) {
       // If there is no access token go to login
       router.push({ name: "Home" });
@@ -32,7 +33,8 @@ axios.interceptors.request.use(
     } else if (access_token && validateToken(access_token)) {
       // If the access_token is good, add it to the headers of the request
       config.headers.Authorization = `Bearer ${access_token}`;
-      console.log(config);
+      isRefreshing = false;
+      // console.log(config);
       return config;
     } else if (!isRefreshing) {
       // If the token is invalid but can be refreshed
@@ -43,7 +45,6 @@ axios.interceptors.request.use(
       };
 
       let new_access_token = await getNewAccessToken(tokens);
-      new_access_token = null;
 
       console.log("New access token: " + new_access_token);
 
@@ -53,7 +54,7 @@ axios.interceptors.request.use(
     } else {
       // No refresh of access token possible.
       router.push({ name: "Home" });
-      return Promise.reject(false);
+      return Promise.reject("No valid token found and refresh not possible.");
     }
   },
   err => {
@@ -74,34 +75,18 @@ function validateToken(access_token) {
 
 async function getNewAccessToken(tokens) {
   console.log("New access token requested");
-  // console.log("Tokens: " + JSON.stringify(tokens, null, "\t"));
-  // instance.headers.Authorization = `Bearer ${tokens.access_token}`; // TODO Moet dit?
-
-  // axios
-  //   .get("https://jsonplaceholder.typicode.com/todos/1")
-  //   .then(res => {
-  //     console.log("Test" + res);
-  //   })
-  //   .catch(err => {
-  //     console.log("Test fail" + err);
-  //   });
-  // let token = await axios
-  //   .post("/refresh-accesstoken", tokens)
-  //   .then(res => {
-  //     console.log("getNewAccessToken response: " + res);
-  //     if (
-  //       res.data.httpStatusCode == 200 &&
-  //       res.data.data.message == "Returning new access token. "
-  //     ) {
-  //       return res.data.data[0];
-  //     } else {
-  //       return null;
-  //     }
-  //   })
-  //   .catch(err => {
-  //     console.log("Could not refresh token: " + err);
-  //     return null;
-  //   });
-
-  return tokens;
+  return await axiosRefresh
+    .post("/refresh-accesstoken", tokens)
+    .then(res => {
+      let token = res.data.data[0];
+      if (token) {
+        return token;
+      } else {
+        return null;
+      }
+    })
+    .catch(err => {
+      console.log("Could not refresh token: " + err);
+      return null;
+    });
 }

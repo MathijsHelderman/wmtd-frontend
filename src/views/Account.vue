@@ -11,7 +11,7 @@
         <p class="error">{{ errorMessage }}</p>
         <v-card>
           <v-card-title>
-            Household of number:
+            Account with id:
             <!-- {{ household.houseNumber + household.houseNumberAddition }} -->
             {{ this.$route.params.id }}
           </v-card-title>
@@ -39,15 +39,11 @@
                 <tr>
                   <td>is admin</td>
                   <td>
-                    {{ household.isAdmin}}
+                    {{ account.isAdmin }}
                   </td>
                 </tr>
               </tbody>
             </table>
-
-          
-
-            
           </v-card-text>
         </v-card>
       </v-col>
@@ -61,32 +57,29 @@ import axios from "@/axios-auth";
 export default {
   name: "Account",
   components: {},
-  data: () => ({
-    DEBUG: false,
-    loadingBool: true,
-    errorMessage: "",
-    successMessage: "",
-    household: {
-      id: "",
-      email: "",
-      firstname: "",
-      lastname: "",
-      isAdmin: "",
-      isActive: "",
-      canPost:""
-      
-      
-    }
-  }),
+  data() {
+    return {
+      DEBUG: false,
+      loadingBool: true,
+      errorMessage: "",
+      successMessage: "",
+      account: {
+        id: "",
+        email: "",
+        firstname: "",
+        lastname: "",
+        isAdmin: "",
+        isActive: "",
+        canPost: ""
+      }
+    };
+  },
 
   mounted() {
-    
-      this.getHousehold();
-    
+    this.getHousehold();
   },
 
   methods: {
-    
     getHousehold() {
       console.log(" api call...");
       this.errorMessage = "";
@@ -95,8 +88,8 @@ export default {
         .get("/accounts/" + this.$route.params.id)
         .then(response => {
           console.log(response);
-          if (response.data.length > 0) {
-            this.household = response.data[0];
+          if (response.data.data.length > 0) {
+            this.account = response.data.data[0];
             this.successMessage = "Success! Got the household object.";
             setTimeout(() => (this.successMessage = ""), 2000);
           } else {

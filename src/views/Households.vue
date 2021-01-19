@@ -170,6 +170,9 @@
         </template>
       </v-data-table>
 
+      <v-btn color="primary" @click="getData">
+        Refresh
+      </v-btn>
       <!-- <Test /> -->
     </v-container>
   </div>
@@ -181,57 +184,59 @@ import axios from "@/axios-auth";
 export default {
   name: "Households",
   components: {},
-  data: () => ({
-    DEBUG: true,
-    loadingBool: true,
-    dialog: false,
-    dialogDelete: false,
-    errorMessage: "",
-    successMessage: "",
-    search: "",
-    headers: [
-      { text: "Id", value: "id", filterable: false },
-      { text: "Code", value: "code", filterable: false },
-      {
-        text: "Max Number Of Accounts",
-        value: "maxNumberOfAccounts",
-        filterable: false
+  data() {
+    return {
+      DEBUG: true,
+      loadingBool: true,
+      dialog: false,
+      dialogDelete: false,
+      errorMessage: "",
+      successMessage: "",
+      search: "",
+      headers: [
+        { text: "Id", value: "id", filterable: false },
+        { text: "Code", value: "code", filterable: false },
+        {
+          text: "Max Number Of Accounts",
+          value: "maxNumberOfAccounts",
+          filterable: false
+        },
+        { text: "Floor", value: "floor", filterable: false },
+        { text: "House number", value: "houseNumber", filterable: true },
+        {
+          text: "House number addition",
+          value: "houseNumberAddition",
+          filterable: true
+        },
+        { text: "Actions", value: "actions", sortable: false, width: "120px" }
+      ],
+      households: [],
+      editedIndex: -1,
+      editedItem: {
+        id: "0",
+        code: "",
+        maxNumberOfAccounts: 0,
+        floor: 0,
+        houseNumber: 0,
+        houseNumberAddition: "",
+        householdSavings: [],
+        accounts: []
       },
-      { text: "Floor", value: "floor", filterable: false },
-      { text: "House number", value: "houseNumber", filterable: true },
-      {
-        text: "House number addition",
-        value: "houseNumberAddition",
-        filterable: true
+      defaultItem: {
+        id: "0",
+        code: "",
+        maxNumberOfAccounts: 0,
+        floor: 0,
+        houseNumber: 0,
+        houseNumberAddition: "",
+        householdSavings: [],
+        accounts: []
       },
-      { text: "Actions", value: "actions", sortable: false, width: "120px" }
-    ],
-    households: [],
-    editedIndex: -1,
-    editedItem: {
-      id: "0",
-      code: "",
-      maxNumberOfAccounts: 0,
-      floor: 0,
-      houseNumber: 0,
-      houseNumberAddition: "",
-      householdSavings: [],
-      accounts: []
-    },
-    defaultItem: {
-      id: "0",
-      code: "",
-      maxNumberOfAccounts: 0,
-      floor: 0,
-      houseNumber: 0,
-      houseNumberAddition: "",
-      householdSavings: [],
-      accounts: []
-    },
-    rules: {
-      required: value => !!value || "Required."
-    }
-  }),
+      rules: {
+        required: value => !!value || "Required."
+      }
+    };
+  },
 
   computed: {
     formTitle() {
@@ -253,14 +258,17 @@ export default {
   },
 
   mounted() {
-    if (this.DEBUG) {
-      this.initializeMock();
-    } else {
-      this.loadData();
-    }
+    this.getData();
   },
 
   methods: {
+    getData() {
+      if (this.DEBUG) {
+        this.initializeMock();
+      } else {
+        this.loadData();
+      }
+    },
     loadData() {
       this.errorMessage = "";
       this.loadingBool = true;
@@ -268,7 +276,7 @@ export default {
         .get("/households")
         .then(response => {
           console.log(response);
-          this.households = response.data;
+          this.households = response.data.data[0];
           // this.successMessage =
           //   "Success! Got " + this.households.length + " household objects.";
           // setTimeout(() => (this.successMessage = ""), 2000);

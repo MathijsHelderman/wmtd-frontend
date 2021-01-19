@@ -108,44 +108,46 @@ import axios from "@/axios-auth";
 export default {
   name: "Household",
   components: {},
-  data: () => ({
-    DEBUG: true,
-    loadingBool: true,
-    errorMessage: "",
-    successMessage: "",
-    household: {
-      id: "",
-      code: "",
-      maxNumberOfAccounts: -1,
-      floor: -1,
-      houseNumber: -1,
-      houseNumberAddition: "",
-      householdSavings: [
-        {
-          id: "",
-          saving: {
+  data() {
+    return {
+      DEBUG: true,
+      loadingBool: true,
+      errorMessage: "",
+      successMessage: "",
+      household: {
+        id: "",
+        code: "",
+        maxNumberOfAccounts: -1,
+        floor: -1,
+        houseNumber: -1,
+        houseNumberAddition: "",
+        householdSavings: [
+          {
             id: "",
-            name: "",
-            description: ""
-          },
-          dailySavings: -1
-        }
-      ],
-      accounts: [
-        {
-          id: "",
-          email: "",
-          hashedPassword: null,
-          firstname: "",
-          lastname: "",
-          isActive: null,
-          isAdmin: null,
-          canPost: null,
-          savings: []
-        }
-      ]
-    }
-  }),
+            saving: {
+              id: "",
+              name: "",
+              description: ""
+            },
+            dailySavings: -1
+          }
+        ],
+        accounts: [
+          {
+            id: "",
+            email: "",
+            hashedPassword: null,
+            firstname: "",
+            lastname: "",
+            isActive: null,
+            isAdmin: null,
+            canPost: null,
+            savings: []
+          }
+        ]
+      }
+    };
+  },
 
   mounted() {
     if (this.DEBUG) {

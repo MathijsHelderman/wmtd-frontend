@@ -63,6 +63,9 @@ export const store = new Vuex.Store({
               return Promise.reject("Cannot login");
             }
 
+            axios.defaults.headers.common["Authorization"] =
+              "Bearer " + access_token;
+
             let accountData = res.data.data[0].accountResponse;
             // console.log(
             //   "Accountdata: " + JSON.stringify(accountData, null, "\t")

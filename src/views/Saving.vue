@@ -26,17 +26,19 @@ import axios from "@/axios-auth";
 export default {
   name: "Saving",
   components: {},
-  data: () => ({
-    DEBUG: true,
-    loadingBool: true,
-    errorMessage: "",
-    successMessage: "",
-    saving: {
-      id: -1,
-      name: "",
-      description: ""
-    }
-  }),
+  data() {
+    return {
+      DEBUG: true,
+      loadingBool: true,
+      errorMessage: "",
+      successMessage: "",
+      saving: {
+        id: -1,
+        name: "",
+        description: ""
+      }
+    };
+  },
 
   mounted() {
     if (this.DEBUG) {
